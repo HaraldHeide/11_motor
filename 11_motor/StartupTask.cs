@@ -42,15 +42,22 @@ namespace _11_motor
 
         public void Run(IBackgroundTaskInstance taskInstance)
         {
-            timer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(500)
-            };
-            timer.Tick += Timer_Tick;
             InitGPIO();
-            if (MotorPin1 != null)
+            if (MotorPin1 == null)
             {
-                timer.Start();
+                return;
+            }
+
+            while (true)
+            {
+                Motor(1);
+                Task.Delay(TimeSpan.FromSeconds(3)).Wait();
+                Motor(0);
+                Task.Delay(TimeSpan.FromSeconds(3)).Wait();
+                Motor(-1);
+                Task.Delay(TimeSpan.FromSeconds(3)).Wait();
+                Motor(0);
+                Task.Delay(TimeSpan.FromSeconds(3)).Wait();
             }
 
             // described in http://aka.ms/backgroundtaskdeferral
@@ -76,18 +83,6 @@ namespace _11_motor
             MotorPin2.SetDriveMode(GpioPinDriveMode.Output);
             MotorEnable = gpio.OpenPin(MOTOR_ENABLE);
             MotorEnable.SetDriveMode(GpioPinDriveMode.Output);
-        }
-
-        private void Timer_Tick(object sender, object e)
-        {
-            Motor(1);
-            Task.Delay(3000);
-            Motor(0);
-            Task.Delay(3000);
-            Motor(-1);
-            Task.Delay(3000);
-            Motor(0);
-            Task.Delay(3000);
         }
 
         private void Motor(int direction)
